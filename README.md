@@ -20,3 +20,10 @@ repositories {
 Minimum Android version: API 24 (Android 7).
 
 This library is Kotlin-only. Java is not a supported public API.
+
+## Usage
+
+```kotlin
+val qualtive = Qualtive(context, containerId = "my-company")
+val enquiry = qualtive.fetchEnquiry("nps")
+```
