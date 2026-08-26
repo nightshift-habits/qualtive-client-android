@@ -18,4 +18,4 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Test and lint
-        run: ./gradlew :qualtive:test :qualtive:lint :demo:lint :demo:assembleDebug
+        run: ./gradlew :qualtive:testDebugUnitTest :qualtive:createDebugUnitTestCoverageReport :qualtive:lint :demo:lint :demo:assembleDebug

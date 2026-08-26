@@ -1,8 +1,10 @@
 package io.qualtive
 
 /**
- * A feedback entry (user response). Posting is implemented in a later ticket; this type holds the
- * content template produced by [Enquiry.entryContentTemplate].
+ * A feedback entry (user response).
+ *
+ * Use [Enquiry.entryContentTemplate] to build empty content for custom UI, then [Qualtive.post]
+ * to submit.
  */
 public data class Entry public constructor(
     public val id: Long? = null,

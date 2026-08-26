@@ -1,6 +1,7 @@
 package io.qualtive
 
 import android.content.Context
+import android.net.Uri
 import io.qualtive.internal.QualtiveImpl
 import io.qualtive.internal.network.HttpUrlConnectionEngine
 
@@ -9,19 +10,12 @@ import io.qualtive.internal.network.HttpUrlConnectionEngine
  *
  * Create an instance with [Qualtive] and inject it in your app (or use a fake in tests).
  *
- * Construction-time options belong on [QualtiveConfig]. User identity, tracking consent, and
- * custom attributes are runtime state on this client so they can change after login.
+ * Construction-time options belong on [QualtiveConfig]. User identity, custom attributes, and
+ * privacy preferences are passed per [post] call.
  */
 public interface Qualtive {
     /** Container (workspace) id this client talks to. */
     public val containerId: String
-
-    /**
-     * Whether a persisted client id may be stored. Defaults to [UserTrackingConsent.Denied].
-     *
-     * Independent of [QualtiveConfig.metadataCollection].
-     */
-    public var userTrackingConsent: UserTrackingConsent
 
     /**
      * Fetches an enquiry definition.
@@ -34,51 +28,53 @@ public interface Qualtive {
         previewToken: String? = null,
     ): Enquiry
 
-    /** Associates the current user with later posts. Pass nulls to clear. */
-    public fun identify(
-        userId: String? = null,
-        name: String? = null,
-        email: String? = null,
-    )
+    /**
+     * Posts a feedback entry for [enquiryId].
+     *
+     * Text sections with [Page.Content.Text.StorageTarget.Attribute] are sent as attributes, not
+     * as text content.
+     *
+     * @param user Optional logged-in user for this entry.
+     * @param customAttributes Optional custom attributes for this entry. Values must be [String],
+     *   [Boolean], or a [Number].
+     * @param options Per-post privacy / metadata options.
+     */
+    public suspend fun post(
+        enquiryId: String,
+        content: List<Entry.Content>,
+        user: User? = null,
+        customAttributes: Map<String, Any> = emptyMap(),
+        options: PostOptions = PostOptions(),
+    ): Entry
 
-    /** Sets a custom string attribute sent with later posts. */
-    public fun setAttribute(
-        name: String,
-        value: String,
-    )
+    /**
+     * Uploads an attachment from a content [Uri] (photo, file, or video picker).
+     *
+     * Streams from the Uri into the upload request — the full file is not buffered in memory.
+     * MIME type is read from [android.content.ContentResolver]. Pass [contentType] to override
+     * when the resolver returns null.
+     */
+    public suspend fun uploadAttachment(
+        uri: Uri,
+        contentType: AttachmentContentType? = null,
+    ): Entry.AttachmentReference
 
-    /** Sets a custom boolean attribute sent with later posts. */
-    public fun setAttribute(
-        name: String,
-        value: Boolean,
-    )
-
-    /** Sets a custom numeric attribute sent with later posts. */
-    public fun setAttribute(
-        name: String,
-        value: Int,
-    )
-
-    /** Sets a custom numeric attribute sent with later posts. */
-    public fun setAttribute(
-        name: String,
-        value: Long,
-    )
-
-    /** Sets a custom numeric attribute sent with later posts. */
-    public fun setAttribute(
-        name: String,
-        value: Double,
-    )
-
-    /** Removes a previously set custom attribute. */
-    public fun removeAttribute(name: String)
+    /**
+     * Uploads an attachment from bytes already in memory.
+     *
+     * Prefer the [Uri] overload for photos and especially video. Use this only for small payloads
+     * you already hold as a [ByteArray].
+     */
+    public suspend fun uploadAttachment(
+        bytes: ByteArray,
+        contentType: AttachmentContentType,
+    ): Entry.AttachmentReference
 }
 
 /**
  * Creates a Qualtive client for [containerId].
  *
- * [context] is retained as `applicationContext` for device/privacy features.
+ * [context] is retained as `applicationContext` for device/privacy features and Uri uploads.
  */
 public fun Qualtive(
     context: Context,

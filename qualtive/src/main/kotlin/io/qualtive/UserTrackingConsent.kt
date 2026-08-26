@@ -1,10 +1,10 @@
 package io.qualtive
 
 /**
- * Whether the current user has consented to a persisted client id.
+ * Whether the user has consented to a persisted client id for a single [Qualtive.post].
  *
- * [Denied] means no client id is stored. Device/app metadata is controlled separately by
- * [MetadataCollection].
+ * Passed via [PostOptions.userTrackingConsent]. [Denied] means no client id is stored or sent.
+ * Device/app metadata is controlled separately by [MetadataCollection].
  */
 public enum class UserTrackingConsent {
     Granted,
