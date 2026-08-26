@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.maven.publish)
     alias(libs.plugins.kotlin.serialization)
+    jacoco
 }
 
 android {
@@ -19,9 +20,19 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+        }
+    }
+
     lint {
         abortOnError = true
         disable += setOf("AndroidGradlePluginVersion", "NewerVersionAvailable", "GradleDependency")
+    }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
     }
 }
 
@@ -39,4 +50,12 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+}
+
+tasks.withType<Test>().configureEach {
+    configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
 }

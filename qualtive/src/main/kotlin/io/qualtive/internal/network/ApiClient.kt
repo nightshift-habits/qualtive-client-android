@@ -3,6 +3,7 @@ package io.qualtive.internal.network
 import io.qualtive.QualtiveConfig
 import io.qualtive.QualtiveException
 import java.io.IOException
+import java.io.OutputStream
 import java.net.URLEncoder
 
 internal class ApiClient(
@@ -16,29 +17,93 @@ internal class ApiClient(
         query: Map<String, String> = emptyMap(),
         parse: (String) -> T,
     ): T {
-        val url = buildUrl(path, query)
         val response =
-            try {
-                httpEngine.execute(
-                    HttpRequest(
-                        method = "GET",
-                        url = url,
-                        headers =
-                            mapOf(
-                                "X-Container" to containerId,
-                                "Accept-Language" to config.locale.toLanguageTag(),
-                                "Accept" to "application/json",
-                            ),
-                    ),
-                )
-            } catch (error: IOException) {
-                throw QualtiveException.Connection(cause = error)
-            } catch (error: QualtiveException) {
-                throw error
-            } catch (error: Exception) {
-                throw QualtiveException.Unexpected(cause = error)
-            }
+            execute(
+                HttpRequest(
+                    method = "GET",
+                    url = buildUrl(path, query),
+                    headers = jsonHeaders(),
+                ),
+            )
+        return parseSuccess(response, parse)
+    }
 
+    suspend fun <T> postJson(
+        path: String,
+        body: ByteArray,
+        parse: (String) -> T,
+    ): T {
+        val response =
+            execute(
+                HttpRequest(
+                    method = "POST",
+                    url = buildUrl(path),
+                    headers =
+                        jsonHeaders() +
+                            mapOf("Content-Type" to "application/json; charset=utf-8"),
+                    body = HttpRequestBody.Bytes(body),
+                ),
+            )
+        return parseSuccess(response, parse)
+    }
+
+    suspend fun putAbsolute(
+        url: String,
+        contentType: String,
+        body: ByteArray,
+    ) {
+        putAbsolute(
+            url = url,
+            contentType = contentType,
+            contentLength = body.size.toLong(),
+            writeTo = { it.write(body) },
+        )
+    }
+
+    suspend fun putAbsolute(
+        url: String,
+        contentType: String,
+        contentLength: Long?,
+        writeTo: (OutputStream) -> Unit,
+    ) {
+        val response =
+            execute(
+                HttpRequest(
+                    method = "PUT",
+                    url = url,
+                    headers = mapOf("Content-Type" to contentType),
+                    body =
+                        HttpRequestBody.Streaming(
+                            contentLength = contentLength,
+                            writeTo = writeTo,
+                        ),
+                    followRedirects = false,
+                ),
+            )
+        when (response.statusCode) {
+            in 200..299 -> Unit
+            404 -> throw QualtiveException.NotFound()
+            503 -> throw QualtiveException.RemoteMaintenance()
+            else ->
+                throw QualtiveException.Unexpected("Unexpected status ${response.statusCode}")
+        }
+    }
+
+    private suspend fun execute(request: HttpRequest): HttpResponse =
+        try {
+            httpEngine.execute(request)
+        } catch (error: IOException) {
+            throw QualtiveException.Connection(cause = error)
+        } catch (error: QualtiveException) {
+            throw error
+        } catch (error: Exception) {
+            throw QualtiveException.Unexpected(cause = error)
+        }
+
+    private fun <T> parseSuccess(
+        response: HttpResponse,
+        parse: (String) -> T,
+    ): T {
         val body = response.body.toString(Charsets.UTF_8)
         return when (response.statusCode) {
             in 200..299 ->
@@ -56,9 +121,16 @@ internal class ApiClient(
         }
     }
 
+    private fun jsonHeaders(): Map<String, String> =
+        mapOf(
+            "X-Container" to containerId,
+            "Accept-Language" to config.locale.toLanguageTag(),
+            "Accept" to "application/json",
+        )
+
     private fun buildUrl(
         path: String,
-        query: Map<String, String>,
+        query: Map<String, String> = emptyMap(),
     ): String {
         val normalizedPath =
             if (path.startsWith("/")) {

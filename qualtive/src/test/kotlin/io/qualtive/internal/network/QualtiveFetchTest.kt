@@ -161,14 +161,3 @@ class QualtiveFetchTest {
             }
         }
 }
-
-internal class FakeHttpEngine(
-    private val handler: (HttpRequest) -> HttpResponse,
-) : HttpEngine {
-    val requests: MutableList<HttpRequest> = mutableListOf()
-
-    override suspend fun execute(request: HttpRequest): HttpResponse {
-        requests += request
-        return handler(request)
-    }
-}
