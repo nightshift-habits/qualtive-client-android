@@ -80,10 +80,9 @@ public fun Qualtive(
     context: Context,
     containerId: String,
     config: QualtiveConfig = QualtiveConfig(),
-): Qualtive =
-    QualtiveImpl(
-        containerId = containerId,
-        httpEngine = HttpUrlConnectionEngine(),
-        config = config,
-        context = context.applicationContext,
-    )
+): Qualtive = QualtiveImpl(
+    containerId = containerId,
+    httpEngine = HttpUrlConnectionEngine(),
+    config = config,
+    context = context.applicationContext,
+)

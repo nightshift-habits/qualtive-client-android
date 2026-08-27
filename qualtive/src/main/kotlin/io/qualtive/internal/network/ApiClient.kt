@@ -39,8 +39,8 @@ internal class ApiClient(
                     method = "POST",
                     url = buildUrl(path),
                     headers =
-                        jsonHeaders() +
-                            mapOf("Content-Type" to "application/json; charset=utf-8"),
+                    jsonHeaders() +
+                        mapOf("Content-Type" to "application/json; charset=utf-8"),
                     body = HttpRequestBody.Bytes(body),
                 ),
             )
@@ -73,32 +73,34 @@ internal class ApiClient(
                     url = url,
                     headers = mapOf("Content-Type" to contentType),
                     body =
-                        HttpRequestBody.Streaming(
-                            contentLength = contentLength,
-                            writeTo = writeTo,
-                        ),
+                    HttpRequestBody.Streaming(
+                        contentLength = contentLength,
+                        writeTo = writeTo,
+                    ),
                     followRedirects = false,
                 ),
             )
         when (response.statusCode) {
             in 200..299 -> Unit
+
             404 -> throw QualtiveException.NotFound()
+
             503 -> throw QualtiveException.RemoteMaintenance()
+
             else ->
                 throw QualtiveException.Unexpected("Unexpected status ${response.statusCode}")
         }
     }
 
-    private suspend fun execute(request: HttpRequest): HttpResponse =
-        try {
-            httpEngine.execute(request)
-        } catch (error: IOException) {
-            throw QualtiveException.Connection(cause = error)
-        } catch (error: QualtiveException) {
-            throw error
-        } catch (error: Exception) {
-            throw QualtiveException.Unexpected(cause = error)
-        }
+    private suspend fun execute(request: HttpRequest): HttpResponse = try {
+        httpEngine.execute(request)
+    } catch (error: IOException) {
+        throw QualtiveException.Connection(cause = error)
+    } catch (error: QualtiveException) {
+        throw error
+    } catch (error: Exception) {
+        throw QualtiveException.Unexpected(cause = error)
+    }
 
     private fun <T> parseSuccess(
         response: HttpResponse,
@@ -114,19 +116,21 @@ internal class ApiClient(
                 } catch (error: Exception) {
                     throw QualtiveException.Unexpected("Failed to parse response", error)
                 }
+
             404 -> throw QualtiveException.NotFound()
+
             503 -> throw QualtiveException.RemoteMaintenance()
+
             else ->
                 throw QualtiveException.Unexpected("Unexpected status ${response.statusCode}")
         }
     }
 
-    private fun jsonHeaders(): Map<String, String> =
-        mapOf(
-            "X-Container" to containerId,
-            "Accept-Language" to config.locale.toLanguageTag(),
-            "Accept" to "application/json",
-        )
+    private fun jsonHeaders(): Map<String, String> = mapOf(
+        "X-Container" to containerId,
+        "Accept-Language" to config.locale.toLanguageTag(),
+        "Accept" to "application/json",
+    )
 
     private fun buildUrl(
         path: String,
@@ -150,6 +154,5 @@ internal class ApiClient(
         return baseUrl.trimEnd('/') + normalizedPath + queryString
     }
 
-    private fun encode(value: String): String =
-        URLEncoder.encode(value, "UTF-8").replace("+", "%20")
+    private fun encode(value: String): String = URLEncoder.encode(value, "UTF-8").replace("+", "%20")
 }

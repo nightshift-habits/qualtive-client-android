@@ -69,10 +69,11 @@ internal class SharedPreferencesStringKeyValueStore(
     }
 }
 
-internal fun SharedPreferencesClientIdStore(context: Context): ClientIdStore =
-    PersistingClientIdStore(
-        store = SharedPreferencesStringKeyValueStore(context),
-    )
+internal class SharedPreferencesClientIdStore(
+    context: Context,
+) : ClientIdStore by PersistingClientIdStore(
+    store = SharedPreferencesStringKeyValueStore(context),
+)
 
 internal class InMemoryClientIdStore : ClientIdStore {
     private var value: String? = null

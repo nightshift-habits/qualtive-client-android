@@ -1,9 +1,9 @@
 package io.qualtive.internal
 
-import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.Locale
 
 class DeviceAttributesCollectorTest {
     @Test

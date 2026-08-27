@@ -46,11 +46,11 @@ class MainActivity : ComponentActivity() {
 
                     Column(
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .safeDrawingPadding()
-                                .verticalScroll(rememberScrollState())
-                                .padding(24.dp),
+                        Modifier
+                            .fillMaxSize()
+                            .safeDrawingPadding()
+                            .verticalScroll(rememberScrollState())
+                            .padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
                                                 client.fetchEnquiry(
                                                     enquiryId = enquiryId.trim(),
                                                     previewToken =
-                                                        previewToken.trim().ifEmpty { null },
+                                                    previewToken.trim().ifEmpty { null },
                                                 )
                                             formatEnquiry(enquiry)
                                         } catch (error: QualtiveException.NotFound) {
@@ -129,47 +129,53 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private fun formatEnquiry(enquiry: Enquiry): String =
-    buildString {
-        appendLine("id: ${enquiry.id}")
-        appendLine("slug: ${enquiry.slug}")
-        appendLine("name: ${enquiry.name}")
-        appendLine("contactRequired: ${enquiry.isUserContactDetailsRequired}")
-        appendLine("container: ${enquiry.container.id} whiteLabel=${enquiry.container.isWhiteLabel} visibility=${enquiry.container.visibilityMode}")
-        appendLine("theme: corner=${enquiry.theme.cornerStyle} background=${enquiry.theme.background} font=${enquiry.theme.font}")
-        appendLine("pages: ${enquiry.pages.size}")
-        enquiry.pages.forEachIndexed { pageIndex, page ->
-            appendLine("  page[$pageIndex] content=${page.content.size}")
-            page.content.forEachIndexed { contentIndex, content ->
-                appendLine("    [$contentIndex] ${describePageContent(content)}")
-            }
+private fun formatEnquiry(enquiry: Enquiry): String = buildString {
+    appendLine("id: ${enquiry.id}")
+    appendLine("slug: ${enquiry.slug}")
+    appendLine("name: ${enquiry.name}")
+    appendLine("contactRequired: ${enquiry.isUserContactDetailsRequired}")
+    appendLine("container: ${enquiry.container.id} whiteLabel=${enquiry.container.isWhiteLabel} visibility=${enquiry.container.visibilityMode}")
+    appendLine("theme: corner=${enquiry.theme.cornerStyle} background=${enquiry.theme.background} font=${enquiry.theme.font}")
+    appendLine("pages: ${enquiry.pages.size}")
+    enquiry.pages.forEachIndexed { pageIndex, page ->
+        appendLine("  page[$pageIndex] content=${page.content.size}")
+        page.content.forEachIndexed { contentIndex, content ->
+            appendLine("    [$contentIndex] ${describePageContent(content)}")
         }
-        appendLine("submittedPages: ${enquiry.submittedPages.size}")
-        enquiry.submittedPages.forEachIndexed { pageIndex, page ->
-            appendLine("  submitted[$pageIndex] conditions=${page.conditions.size} content=${page.content.size}")
-            page.conditions.forEachIndexed { conditionIndex, condition ->
-                appendLine("    condition[$conditionIndex] $condition")
-            }
-            page.content.forEachIndexed { contentIndex, content ->
-                appendLine("    content[$contentIndex] ${content::class.simpleName}")
-            }
-        }
-        appendLine("entryContentTemplate: ${enquiry.entryContentTemplate().size} items")
     }
+    appendLine("submittedPages: ${enquiry.submittedPages.size}")
+    enquiry.submittedPages.forEachIndexed { pageIndex, page ->
+        appendLine("  submitted[$pageIndex] conditions=${page.conditions.size} content=${page.content.size}")
+        page.conditions.forEachIndexed { conditionIndex, condition ->
+            appendLine("    condition[$conditionIndex] $condition")
+        }
+        page.content.forEachIndexed { contentIndex, content ->
+            appendLine("    content[$contentIndex] ${content::class.simpleName}")
+        }
+    }
+    appendLine("entryContentTemplate: ${enquiry.entryContentTemplate().size} items")
+}
 
-private fun describePageContent(content: Page.Content): String =
-    when (content) {
-        is Page.Content.Title -> "title text=${content.text}"
-        is Page.Content.Body -> "body text=${content.text}"
-        is Page.Content.Image -> "image url=${content.attachment.url}"
-        is Page.Content.Score ->
-            "score type=${content.scoreType} leading=${content.leadingText} trailing=${content.trailingText}"
-        is Page.Content.Text ->
-            "text placeholder=${content.placeholder} storage=${content.storageTarget}"
-        is Page.Content.Select ->
-            "select options=${content.options} custom=${content.allowsCustomInput}"
-        is Page.Content.Multiselect -> "multiselect options=${content.options}"
-        is Page.Content.Attachments -> "attachments"
-        is Page.Content.ContactDetails ->
-            "contactDetails title=${content.title} placeholder=${content.placeholder}"
-    }
+private fun describePageContent(content: Page.Content): String = when (content) {
+    is Page.Content.Title -> "title text=${content.text}"
+
+    is Page.Content.Body -> "body text=${content.text}"
+
+    is Page.Content.Image -> "image url=${content.attachment.url}"
+
+    is Page.Content.Score ->
+        "score type=${content.scoreType} leading=${content.leadingText} trailing=${content.trailingText}"
+
+    is Page.Content.Text ->
+        "text placeholder=${content.placeholder} storage=${content.storageTarget}"
+
+    is Page.Content.Select ->
+        "select options=${content.options} custom=${content.allowsCustomInput}"
+
+    is Page.Content.Multiselect -> "multiselect options=${content.options}"
+
+    is Page.Content.Attachments -> "attachments"
+
+    is Page.Content.ContactDetails ->
+        "contactDetails title=${content.title} placeholder=${content.placeholder}"
+}

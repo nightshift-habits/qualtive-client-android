@@ -12,20 +12,20 @@ class ClientIdStoreTest {
         val store =
             PersistingClientIdStore(
                 store =
-                    object : StringKeyValueStore {
-                        override fun getString(key: String): String? = memory[key]
+                object : StringKeyValueStore {
+                    override fun getString(key: String): String? = memory[key]
 
-                        override fun putString(
-                            key: String,
-                            value: String,
-                        ) {
-                            memory[key] = value
-                        }
+                    override fun putString(
+                        key: String,
+                        value: String,
+                    ) {
+                        memory[key] = value
+                    }
 
-                        override fun remove(key: String) {
-                            memory.remove(key)
-                        }
-                    },
+                    override fun remove(key: String) {
+                        memory.remove(key)
+                    }
+                },
                 generateId = { "generated-id" },
             )
 
@@ -45,20 +45,20 @@ class ClientIdStoreTest {
         val store =
             PersistingClientIdStore(
                 store =
-                    object : StringKeyValueStore {
-                        override fun getString(key: String): String? = memory[key]
+                object : StringKeyValueStore {
+                    override fun getString(key: String): String? = memory[key]
 
-                        override fun putString(
-                            key: String,
-                            value: String,
-                        ) {
-                            memory[key] = value
-                        }
+                    override fun putString(
+                        key: String,
+                        value: String,
+                    ) {
+                        memory[key] = value
+                    }
 
-                        override fun remove(key: String) {
-                            memory.remove(key)
-                        }
-                    },
+                    override fun remove(key: String) {
+                        memory.remove(key)
+                    }
+                },
                 generateId = { "should-not-be-used" },
             )
 

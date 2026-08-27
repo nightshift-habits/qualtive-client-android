@@ -26,27 +26,27 @@ class EntryPostEncoderTest {
                 Entry.Content.Score(
                     value = 80,
                     definition =
-                        Page.Content.Score(
-                            scoreType = ScoreType.Stars5,
-                            leadingText = "Bad",
-                            trailingText = "Good",
-                        ),
+                    Page.Content.Score(
+                        scoreType = ScoreType.Stars5,
+                        leadingText = "Bad",
+                        trailingText = "Good",
+                    ),
                 ),
                 Entry.Content.Text(
                     value = "Hello",
                     definition =
-                        Page.Content.Text(
-                            placeholder = null,
-                            storageTarget = Page.Content.Text.StorageTarget.Text,
-                        ),
+                    Page.Content.Text(
+                        placeholder = null,
+                        storageTarget = Page.Content.Text.StorageTarget.Text,
+                    ),
                 ),
                 Entry.Content.Text(
                     value = "32",
                     definition =
-                        Page.Content.Text(
-                            placeholder = null,
-                            storageTarget = Page.Content.Text.StorageTarget.Attribute("Age"),
-                        ),
+                    Page.Content.Text(
+                        placeholder = null,
+                        storageTarget = Page.Content.Text.StorageTarget.Attribute("Age"),
+                    ),
                 ),
                 Entry.Content.Select(value = "A"),
                 Entry.Content.Multiselect(values = listOf("X", "Y")),
@@ -81,26 +81,26 @@ class EntryPostEncoderTest {
                 Entry.Content.Text(
                     value = "32",
                     definition =
-                        Page.Content.Text(
-                            placeholder = null,
-                            storageTarget = Page.Content.Text.StorageTarget.Attribute("Age"),
-                        ),
+                    Page.Content.Text(
+                        placeholder = null,
+                        storageTarget = Page.Content.Text.StorageTarget.Attribute("Age"),
+                    ),
                 ),
                 Entry.Content.Text(
                     value = "   ",
                     definition =
-                        Page.Content.Text(
-                            placeholder = null,
-                            storageTarget = Page.Content.Text.StorageTarget.Attribute("Skip"),
-                        ),
+                    Page.Content.Text(
+                        placeholder = null,
+                        storageTarget = Page.Content.Text.StorageTarget.Attribute("Skip"),
+                    ),
                 ),
                 Entry.Content.Text(
                     value = "kept as text",
                     definition =
-                        Page.Content.Text(
-                            placeholder = null,
-                            storageTarget = Page.Content.Text.StorageTarget.Text,
-                        ),
+                    Page.Content.Text(
+                        placeholder = null,
+                        storageTarget = Page.Content.Text.StorageTarget.Text,
+                    ),
                 ),
             )
 

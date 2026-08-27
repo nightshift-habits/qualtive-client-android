@@ -13,13 +13,14 @@ internal class FakeHttpEngine(
     }
 }
 
-internal fun HttpRequestBody?.readAllBytes(): ByteArray? =
-    when (this) {
-        null -> null
-        is HttpRequestBody.Bytes -> bytes
-        is HttpRequestBody.Streaming -> {
-            val buffer = ByteArrayOutputStream()
-            writeTo(buffer)
-            buffer.toByteArray()
-        }
+internal fun HttpRequestBody?.readAllBytes(): ByteArray? = when (this) {
+    null -> null
+
+    is HttpRequestBody.Bytes -> bytes
+
+    is HttpRequestBody.Streaming -> {
+        val buffer = ByteArrayOutputStream()
+        writeTo(buffer)
+        buffer.toByteArray()
     }
+}

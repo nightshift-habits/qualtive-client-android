@@ -21,11 +21,11 @@ import io.qualtive.internal.entry.EntryPostEncoder
 import io.qualtive.internal.entry.PostEntryResponse
 import io.qualtive.internal.network.ApiClient
 import io.qualtive.internal.network.HttpEngine
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.OutputStream
 import java.net.URLEncoder
 import java.util.TimeZone
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 internal class QualtiveImpl(
     override val containerId: String,
@@ -160,13 +160,12 @@ internal class QualtiveImpl(
     override suspend fun uploadAttachment(
         bytes: ByteArray,
         contentType: AttachmentContentType,
-    ): Entry.AttachmentReference =
-        uploadAttachmentStreaming(
-            contentType = contentType,
-            contentLength = bytes.size.toLong(),
-        ) { output ->
-            output.write(bytes)
-        }
+    ): Entry.AttachmentReference = uploadAttachmentStreaming(
+        contentType = contentType,
+        contentLength = bytes.size.toLong(),
+    ) { output ->
+        output.write(bytes)
+    }
 
     private suspend fun uploadAttachmentStreaming(
         contentType: AttachmentContentType,
@@ -230,7 +229,6 @@ internal class QualtiveImpl(
                 explicitNulls = false
             }
 
-        private fun encodePathSegment(value: String): String =
-            URLEncoder.encode(value, "UTF-8").replace("+", "%20")
+        private fun encodePathSegment(value: String): String = URLEncoder.encode(value, "UTF-8").replace("+", "%20")
     }
 }

@@ -44,6 +44,7 @@ internal open class SkipUnknownListSerializer<T>(
         val array =
             when (val element = jsonDecoder.decodeJsonElement()) {
                 is JsonArray -> element
+
                 else -> {
                     Logger.hintNewVersion("$label list")
                     return emptyList()

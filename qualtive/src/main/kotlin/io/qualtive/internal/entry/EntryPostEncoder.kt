@@ -37,81 +37,86 @@ internal object EntryPostEncoder {
                 questionId = questionId,
                 content = encodeContent(content),
                 user =
-                    PostEntryUser(
-                        id = userId,
-                        name = name,
-                        email = email,
-                        clientId = clientId,
-                        timeZoneIdentifier = timeZoneIdentifier,
-                    ),
+                PostEntryUser(
+                    id = userId,
+                    name = name,
+                    email = email,
+                    clientId = clientId,
+                    timeZoneIdentifier = timeZoneIdentifier,
+                ),
                 attributes = attributes,
                 attributeHints = PostEntryAttributeHints(clientLibrary = "android"),
             )
         return json.encodeToString(body).toByteArray(Charsets.UTF_8)
     }
 
-    fun encodeContent(content: List<Entry.Content>): List<JsonElement> =
-        content.mapNotNull { section ->
-            when (section) {
-                is Entry.Content.Title ->
-                    buildJsonObject {
-                        put("type", "title")
-                        put("text", section.text)
-                    }
-                is Entry.Content.Score ->
-                    buildJsonObject {
-                        put("type", "score")
-                        section.value?.let { put("value", it) }
-                        val scoreType = section.definition?.scoreType ?: ScoreType.Smilies5
-                        put("scoreType", scoreType.toApi())
-                        section.definition?.leadingText?.let { put("leadingText", it) }
-                        section.definition?.trailingText?.let { put("trailingText", it) }
-                    }
-                is Entry.Content.Text -> {
-                    when (section.definition?.storageTarget) {
-                        is Page.Content.Text.StorageTarget.Attribute -> null
-                        else ->
-                            buildJsonObject {
-                                put("type", "text")
-                                if (section.value != null) {
-                                    put("value", section.value)
-                                } else {
-                                    put("value", JsonNull)
-                                }
+    fun encodeContent(content: List<Entry.Content>): List<JsonElement> = content.mapNotNull { section ->
+        when (section) {
+            is Entry.Content.Title ->
+                buildJsonObject {
+                    put("type", "title")
+                    put("text", section.text)
+                }
+
+            is Entry.Content.Score ->
+                buildJsonObject {
+                    put("type", "score")
+                    section.value?.let { put("value", it) }
+                    val scoreType = section.definition?.scoreType ?: ScoreType.Smilies5
+                    put("scoreType", scoreType.toApi())
+                    section.definition?.leadingText?.let { put("leadingText", it) }
+                    section.definition?.trailingText?.let { put("trailingText", it) }
+                }
+
+            is Entry.Content.Text -> {
+                when (section.definition?.storageTarget) {
+                    is Page.Content.Text.StorageTarget.Attribute -> null
+
+                    else ->
+                        buildJsonObject {
+                            put("type", "text")
+                            if (section.value != null) {
+                                put("value", section.value)
+                            } else {
+                                put("value", JsonNull)
                             }
+                        }
+                }
+            }
+
+            is Entry.Content.Select ->
+                buildJsonObject {
+                    put("type", "select")
+                    if (section.value != null) {
+                        put("value", section.value)
+                    } else {
+                        put("value", JsonNull)
                     }
                 }
-                is Entry.Content.Select ->
-                    buildJsonObject {
-                        put("type", "select")
-                        if (section.value != null) {
-                            put("value", section.value)
-                        } else {
-                            put("value", JsonNull)
-                        }
-                    }
-                is Entry.Content.Multiselect ->
-                    buildJsonObject {
-                        put("type", "multiselect")
-                        put(
-                            "values",
-                            JsonArray(section.values.map { JsonPrimitive(it) }),
-                        )
-                    }
-                is Entry.Content.Attachments ->
-                    buildJsonObject {
-                        put("type", "attachments")
-                        put(
-                            "values",
-                            JsonArray(
-                                section.attachments.map { attachment ->
-                                    JsonObject(mapOf("id" to JsonPrimitive(attachment.id)))
-                                },
-                            ),
-                        )
-                    }
-            }
+
+            is Entry.Content.Multiselect ->
+                buildJsonObject {
+                    put("type", "multiselect")
+                    put(
+                        "values",
+                        JsonArray(section.values.map { JsonPrimitive(it) }),
+                    )
+                }
+
+            is Entry.Content.Attachments ->
+                buildJsonObject {
+                    put("type", "attachments")
+                    put(
+                        "values",
+                        JsonArray(
+                            section.attachments.map { attachment ->
+                                JsonObject(mapOf("id" to JsonPrimitive(attachment.id)))
+                            },
+                        ),
+                    )
+                }
         }
+    }
 
     fun attributesFromContent(content: List<Entry.Content>): Map<String, String> {
         val result = linkedMapOf<String, String>()
@@ -133,12 +138,19 @@ internal object EntryPostEncoder {
             result[key] =
                 when (value) {
                     is String -> value
+
                     is Boolean -> value.toString()
+
                     is Int -> value.toString()
+
                     is Long -> value.toString()
+
                     is Float -> stringifyNumber(value.toDouble())
+
                     is Double -> stringifyNumber(value)
+
                     is Number -> stringifyNumber(value.toDouble())
+
                     else ->
                         throw IllegalArgumentException(
                             "attribute \"$key\" must be String, Boolean, or Number",
@@ -160,12 +172,11 @@ internal object EntryPostEncoder {
         return result
     }
 
-    private fun stringifyNumber(value: Double): String =
-        if (value % 1.0 == 0.0 && value in Long.MIN_VALUE.toDouble()..Long.MAX_VALUE.toDouble()) {
-            value.toLong().toString()
-        } else {
-            value.toString()
-        }
+    private fun stringifyNumber(value: Double): String = if (value % 1.0 == 0.0 && value in Long.MIN_VALUE.toDouble()..Long.MAX_VALUE.toDouble()) {
+        value.toLong().toString()
+    } else {
+        value.toString()
+    }
 }
 
 @Serializable
