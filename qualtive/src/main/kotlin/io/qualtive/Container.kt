@@ -4,16 +4,9 @@ package io.qualtive
 public data class Container public constructor(
     public val id: String,
     public val isWhiteLabel: Boolean,
-    public val logo: Logo?,
     public val customLogos: List<CustomLogo>,
-    public val version: String,
     public val visibilityMode: VisibilityMode,
 ) {
-    public data class Logo public constructor(
-        public val urlVector: String?,
-        public val urlVectorDark: String?,
-    )
-
     public data class CustomLogo public constructor(
         public val size: Size,
         public val intendedBackground: IntendedBackground,

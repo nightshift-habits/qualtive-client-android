@@ -7,7 +7,6 @@ import io.qualtive.ScoreType
 import io.qualtive.SubmittedPage
 import io.qualtive.Theme
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -203,8 +202,8 @@ class EnquiryParserTest {
         assertTrue(enquiry.pages[0].content[0] is Page.Content.Title)
         assertEquals(Theme.CornerStyle.Square, enquiry.theme.cornerStyle)
         assertTrue(enquiry.theme.font is Theme.Font.Custom)
-        assertEquals("https://a.svg", enquiry.container.logo?.urlVector)
-        assertNull(enquiry.container.logo?.urlVectorDark)
+        assertTrue(enquiry.container.isWhiteLabel)
+        assertEquals(Container.VisibilityMode.Public, enquiry.container.visibilityMode)
         assertEquals(1, enquiry.container.customLogos.size)
     }
 

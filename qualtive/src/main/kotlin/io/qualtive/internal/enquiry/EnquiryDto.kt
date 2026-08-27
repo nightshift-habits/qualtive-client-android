@@ -252,16 +252,8 @@ internal sealed class FontDto {
 internal data class ContainerDto(
     val id: String,
     val isWhiteLabel: Boolean = false,
-    val logo: ContainerLogoDto? = null,
     val customLogos: List<CustomLogoDto> = emptyList(),
-    val version: String = "",
     val visibilityMode: String,
-)
-
-@Serializable
-internal data class ContainerLogoDto(
-    val urlVector: String? = null,
-    val urlVectorDark: String? = null,
 )
 
 @Serializable

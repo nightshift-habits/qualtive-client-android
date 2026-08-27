@@ -227,15 +227,7 @@ private fun FontDto.toDomain(): Theme.Font = when (this) {
 private fun ContainerDto.toDomain(): Container = Container(
     id = id,
     isWhiteLabel = isWhiteLabel,
-    logo =
-    logo?.let {
-        Container.Logo(
-            urlVector = it.urlVector,
-            urlVectorDark = it.urlVectorDark,
-        )
-    },
     customLogos = customLogos.mapNotNull { it.toDomain() },
-    version = version,
     visibilityMode =
     when (visibilityMode) {
         "public" -> Container.VisibilityMode.Public
