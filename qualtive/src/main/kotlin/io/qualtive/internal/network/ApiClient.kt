@@ -10,6 +10,7 @@ internal class ApiClient(
     private val httpEngine: HttpEngine,
     private val baseUrl: String,
     private val containerId: String,
+    private val workspaceId: String? = null,
     private val config: QualtiveConfig,
 ) {
     suspend fun <T> get(
@@ -126,11 +127,14 @@ internal class ApiClient(
         }
     }
 
-    private fun jsonHeaders(): Map<String, String> = mapOf(
-        "X-Container" to containerId,
-        "Accept-Language" to config.locale.toLanguageTag(),
-        "Accept" to "application/json",
-    )
+    private fun jsonHeaders(): Map<String, String> = buildMap {
+        put("X-Container", containerId)
+        if (workspaceId != null) {
+            put("X-Workspace", workspaceId)
+        }
+        put("Accept-Language", config.locale.toLanguageTag())
+        put("Accept", "application/json")
+    }
 
     private fun buildUrl(
         path: String,

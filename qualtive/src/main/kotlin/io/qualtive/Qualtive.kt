@@ -14,8 +14,11 @@ import io.qualtive.internal.network.HttpUrlConnectionEngine
  * privacy preferences are passed per [post] call.
  */
 public interface Qualtive {
-    /** Container (workspace) id this client talks to. */
+    /** Container id this client talks to. */
     public val containerId: String
+
+    /** Optional workspace slug sent as `X-Workspace`. */
+    public val workspaceId: String?
 
     /**
      * Fetches an enquiry definition.
@@ -74,14 +77,19 @@ public interface Qualtive {
 /**
  * Creates a Qualtive client for [containerId].
  *
+ * [workspaceId] is an optional workspace slug sent as `X-Workspace`. When omitted, the user API
+ * uses the container's default workspace.
+ *
  * [context] is retained as `applicationContext` for device/privacy features and Uri uploads.
  */
 public fun Qualtive(
     context: Context,
     containerId: String,
+    workspaceId: String? = null,
     config: QualtiveConfig = QualtiveConfig(),
 ): Qualtive = QualtiveImpl(
     containerId = containerId,
+    workspaceId = workspaceId,
     httpEngine = HttpUrlConnectionEngine(),
     config = config,
     context = context.applicationContext,

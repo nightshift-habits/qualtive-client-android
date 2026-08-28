@@ -5,6 +5,7 @@ import io.qualtive.QualtiveException
 import io.qualtive.internal.QualtiveImpl
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
@@ -19,6 +20,7 @@ class QualtiveFetchTest {
                 assertEquals("GET", request.method)
                 assertTrue(request.url.endsWith("/feedback/enquiries/android/"))
                 assertEquals("ci-test", request.headers["X-Container"])
+                assertFalse(request.headers.containsKey("X-Workspace"))
                 assertEquals("en-US", request.headers["Accept-Language"])
                 HttpResponse(
                     statusCode = 200,
@@ -78,6 +80,60 @@ class QualtiveFetchTest {
         assertEquals(5326232893784064L, enquiry.id)
         assertEquals("android", enquiry.slug)
         assertEquals(1, engine.requests.size)
+    }
+
+    @Test
+    fun fetchEnquirySendsWorkspaceHeaderWhenSet() = runTest {
+        val engine =
+            FakeHttpEngine { request ->
+                assertEquals("ci-test", request.headers["X-Container"])
+                assertEquals("my-department", request.headers["X-Workspace"])
+                HttpResponse(
+                    statusCode = 200,
+                    body =
+                    """
+                            {
+                              "id": 1,
+                              "slug": "android",
+                              "name": "Android?",
+                              "pages": [{"content": []}],
+                              "submittedPages": [
+                                {
+                                  "conditions": [],
+                                  "content": [{ "type": "confirmationText", "text": "Thanks" }]
+                                }
+                              ],
+                              "theme": {
+                                "cornerStyle": "rounded",
+                                "background": { "type": "predefined", "value": "plain" },
+                                "font": { "type": "predefined", "value": "default" },
+                                "isBackgroundAttachmentVisibleInResponses": true,
+                                "isBackgroundColorVisibleInResponses": true
+                              },
+                              "container": {
+                                "id": "ci-test",
+                                "isWhiteLabel": false,
+                                "logo": null,
+                                "customLogos": [],
+                                "version": "qualtive",
+                                "visibilityMode": "private"
+                              },
+                              "isUserContactDetailsRequired": false
+                            }
+                    """.trimIndent().toByteArray(),
+                )
+            }
+
+        val client =
+            QualtiveImpl(
+                containerId = "ci-test",
+                workspaceId = "my-department",
+                httpEngine = engine,
+                config = QualtiveConfig(locale = Locale.US),
+            )
+
+        client.fetchEnquiry("android")
+        assertEquals("my-department", engine.requests.single().headers["X-Workspace"])
     }
 
     @Test

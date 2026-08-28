@@ -25,6 +25,12 @@ This library is Kotlin-only. Java is not a supported public API.
 
 First of all, make sure you have created a question on [qualtive.io](https://qualtive.io). Each feedback entry is posted to an enquiry (ID or slug) within your container.
 
+Optionally pass a workspace slug. When omitted, the user API uses the container's default workspace.
+
+```kotlin
+val qualtive = Qualtive(context, containerId = "my-company", workspaceId = "my-department")
+```
+
 ### Fetching an enquiry
 
 ```kotlin

@@ -29,6 +29,7 @@ import java.util.TimeZone
 
 internal class QualtiveImpl(
     override val containerId: String,
+    override val workspaceId: String? = null,
     httpEngine: HttpEngine,
     internal val config: QualtiveConfig,
     context: Context? = null,
@@ -43,6 +44,7 @@ internal class QualtiveImpl(
             httpEngine = httpEngine,
             baseUrl = baseUrl,
             containerId = containerId,
+            workspaceId = workspaceId,
             config = config,
         )
 

@@ -30,6 +30,26 @@ class EnquiryFetchIntegrationTest {
     }
 
     @Test
+    fun fetchSuccessFromLiveApiWithWorkspace() = runTest {
+        val client =
+            QualtiveImpl(
+                containerId = "ci-test",
+                workspaceId = "ci-test-2",
+                httpEngine = HttpUrlConnectionEngine(),
+                config = QualtiveConfig(locale = Locale.US),
+            )
+
+        val enquiry = client.fetchEnquiry("android-2")
+        assertEquals(5844484854120448L, enquiry.id)
+        assertEquals("android-2", enquiry.slug)
+        assertEquals("Android?", enquiry.name)
+        assertTrue(enquiry.pages.isNotEmpty())
+        assertTrue(enquiry.pages[0].content.isNotEmpty())
+        assertTrue(enquiry.submittedPages.isNotEmpty())
+        assertEquals("ci-test", enquiry.container.id)
+    }
+
+    @Test
     fun fetchNotFoundFromLiveApi() = runTest {
         val client =
             QualtiveImpl(

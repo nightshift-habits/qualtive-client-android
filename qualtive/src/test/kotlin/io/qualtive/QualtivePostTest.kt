@@ -39,6 +39,7 @@ class QualtivePostTest {
                 assertEquals("POST", request.method)
                 assertTrue(request.url.endsWith("/feedback/entries/"))
                 assertEquals("ci-test", request.headers["X-Container"])
+                assertFalse(request.headers.containsKey("X-Workspace"))
 
                 val body =
                     json
@@ -137,6 +138,28 @@ class QualtivePostTest {
     }
 
     @Test
+    fun postSendsWorkspaceHeaderWhenSet() = runTest {
+        val engine =
+            FakeHttpEngine { request ->
+                assertEquals("my-department", request.headers["X-Workspace"])
+                HttpResponse(statusCode = 201, body = """{"id":1}""".toByteArray())
+            }
+
+        val client =
+            QualtiveImpl(
+                containerId = "ci-test",
+                workspaceId = "my-department",
+                httpEngine = engine,
+                config = QualtiveConfig(locale = Locale.US),
+                clientIdStore = InMemoryClientIdStore(),
+                deviceAttributesCollector = FixedDeviceAttributes(emptyMap()),
+            )
+
+        client.post("android", listOf(Entry.Content.Text(value = "Hi")))
+        assertEquals("my-department", engine.requests.single().headers["X-Workspace"])
+    }
+
+    @Test
     fun postOmitsClientIdAndDeviceAttributesWhenOptionsRestrictPrivacy() = runTest {
         val clientIdStore = InMemoryClientIdStore()
         clientIdStore.getOrCreate()
@@ -220,6 +243,7 @@ class QualtivePostTest {
                     0 -> {
                         assertEquals("POST", request.method)
                         assertTrue(request.url.endsWith("/feedback/attachments/"))
+                        assertFalse(request.headers.containsKey("X-Workspace"))
                         val body =
                             json
                                 .parseToJsonElement(
@@ -242,6 +266,8 @@ class QualtivePostTest {
                         assertEquals("PUT", request.method)
                         assertEquals("https://uploads.example/put", request.url)
                         assertEquals("image/png", request.headers["Content-Type"])
+                        assertFalse(request.headers.containsKey("X-Workspace"))
+                        assertFalse(request.headers.containsKey("X-Container"))
                         assertFalse(request.followRedirects)
                         val streaming = request.body as HttpRequestBody.Streaming
                         assertEquals(4L, streaming.contentLength)
@@ -265,6 +291,45 @@ class QualtivePostTest {
             )
         assertEquals(55L, reference.id)
         assertEquals(2, engine.requests.size)
+    }
+
+    @Test
+    fun uploadAttachmentSendsWorkspaceHeaderOnCreateOnly() = runTest {
+        var call = 0
+        val engine =
+            FakeHttpEngine { request ->
+                when (call++) {
+                    0 -> {
+                        assertEquals("POST", request.method)
+                        assertEquals("my-department", request.headers["X-Workspace"])
+                        HttpResponse(
+                            statusCode = 201,
+                            body = """{"id":9,"uploadUrl":"https://uploads.example/put"}""".toByteArray(),
+                        )
+                    }
+
+                    else -> {
+                        assertEquals("PUT", request.method)
+                        assertFalse(request.headers.containsKey("X-Workspace"))
+                        HttpResponse(statusCode = 200, body = ByteArray(0))
+                    }
+                }
+            }
+
+        val client =
+            QualtiveImpl(
+                containerId = "ci-test",
+                workspaceId = "my-department",
+                httpEngine = engine,
+                config = QualtiveConfig(),
+            )
+
+        val reference =
+            client.uploadAttachment(
+                bytes = byteArrayOf(1),
+                contentType = AttachmentContentType.ImagePng,
+            )
+        assertEquals(9L, reference.id)
     }
 
     @Test
