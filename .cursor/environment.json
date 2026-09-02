@@ -1,0 +1,4 @@
+{
+  "name": "qualtive-client-android",
+  "install": "bash .cursor/install.sh"
+}
